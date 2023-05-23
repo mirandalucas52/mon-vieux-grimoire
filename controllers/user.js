@@ -1,15 +1,47 @@
 const bcrypt = require("bcrypt");
-
 const User = require("../models/User");
-
 const jwt = require("jsonwebtoken");
+const emailValidator = require("email-validator");
+const passwordValidator = require("password-validator");
+const mongoSanitize = require("mongo-sanitize");
+
+const passwordSchema = new passwordValidator();
+passwordSchema
+    .is()
+    .min(8)
+    .is()
+    .max(100)
+    .has()
+    .uppercase()
+    .has()
+    .lowercase()
+    .has()
+    .digits()
+    .has()
+    .symbols()
+    .has()
+    .not()
+    .spaces();
 
 exports.signup = (req, res, next) => {
+    let { email, password } = req.body;
+
+    email = mongoSanitize(email);
+    password = mongoSanitize(password);
+
+    if (!emailValidator.validate(email)) {
+        return res.status(400).json({ error: "Adresse e-mail invalide" });
+    }
+
+    if (!passwordSchema.validate(password)) {
+        return res.status(400).json({ error: "Mot de passe invalide" });
+    }
+
     bcrypt
-        .hash(req.body.password, 10)
+        .hash(password, 10)
         .then((hash) => {
             const user = new User({
-                email: req.body.email,
+                email: email,
                 password: hash,
             });
             user.save()
@@ -22,7 +54,16 @@ exports.signup = (req, res, next) => {
 };
 
 exports.login = (req, res, next) => {
-    User.findOne({ email: req.body.email })
+    let { email, password } = req.body;
+
+    email = mongoSanitize(email);
+    password = mongoSanitize(password);
+
+    if (!emailValidator.validate(email)) {
+        return res.status(400).json({ error: "Adresse e-mail invalide" });
+    }
+
+    User.findOne({ email: email })
         .then((user) => {
             if (!user) {
                 return res
@@ -30,7 +71,7 @@ exports.login = (req, res, next) => {
                     .json({ error: "Utilisateur non trouvé !" });
             }
             bcrypt
-                .compare(req.body.password, user.password)
+                .compare(password, user.password)
                 .then((valid) => {
                     if (!valid) {
                         return res
@@ -42,7 +83,9 @@ exports.login = (req, res, next) => {
                         token: jwt.sign(
                             { userId: user._id },
                             "RANDOM_TOKEN_SECRET",
-                            { expiresIn: "24h" }
+                            {
+                                expiresIn: "24h",
+                            }
                         ),
                     });
                 })

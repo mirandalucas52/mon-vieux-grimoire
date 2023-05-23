@@ -5,6 +5,14 @@ const bodyParser = require("body-parser");
 const booksRoutes = require("./routes/books");
 const userRoutes = require("./routes/user");
 const path = require("path");
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 mongoose
     .connect(
@@ -14,6 +22,7 @@ mongoose
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
 
+app.use(limiter);
 app.use(express.json());
 app.use(bodyParser.json());
 

@@ -1,20 +1,23 @@
 const multer = require("multer");
+const path = require("path");
 
-const MIME_TYPES = {
-    "image/jpg": "jpg",
-    "image/jpeg": "jpg",
-    "image/png": "png",
+// Vérifie le fichier entrant et n'accepte que jpeg, jpg, png et webp
+const fileFilter = function (req, file, callback) {
+    console.log(req);
+    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.mimetype)) {
+        const error = new Error("Type de fichier non-accepté");
+        error.code = "LIMIT_FILE_TYPES";
+        return callback(error, false);
+    }
+    callback(null, true);
 };
 
-const storage = multer.diskStorage({
-    destination: (req, file, callback) => {
-        callback(null, "images");
-    },
-    filename: (req, file, callback) => {
-        const name = file.originalname.split(" ").join("_");
-        const extension = MIME_TYPES[file.mimetype];
-        callback(null, name + Date.now() + "." + extension);
-    },
+const storage = multer.memoryStorage();
+
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
 });
 
-module.exports = multer({ storage: storage }).single("image");
+module.exports = upload.single("image");
