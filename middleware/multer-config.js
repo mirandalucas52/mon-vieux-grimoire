@@ -1,5 +1,4 @@
 const multer = require("multer");
-const path = require("path");
 
 // Vérifie le fichier entrant et n'accepte que jpeg, jpg, png et webp
 const fileFilter = function (req, file, callback) {

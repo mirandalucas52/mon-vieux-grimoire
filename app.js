@@ -6,7 +6,7 @@ const booksRoutes = require("./routes/books");
 const userRoutes = require("./routes/user");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
-
+require("dotenv").config();
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
@@ -16,7 +16,13 @@ const limiter = rateLimit({
 
 mongoose
     .connect(
-        "mongodb+srv://Lucas:o4OYTH35zc53AUkm@mon-vieux-grimoire.iyfncaf.mongodb.net/?retryWrites=true&w=majority",
+        "mongodb+srv://" +
+            process.env.MONGODB_LOGIN +
+            ":" +
+            process.env.MONGODB_PASSWORD +
+            "@" +
+            process.env.MONGODB_CLUSTER +
+            "/?retryWrites=true&w=majority",
         { useNewUrlParser: true, useUnifiedTopology: true }
     )
     .then(() => console.log("Connexion à MongoDB réussie !"))
