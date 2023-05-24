@@ -50,6 +50,12 @@ exports.modifyBook = (req, res, next) => {
                 return res.status(403).json({ message: "Not authorized" });
             }
 
+            if (book.userId.toString() !== req.auth.userId.toString()) {
+                return res
+                    .status(403)
+                    .json({ message: "Not authorized to modify this book" });
+            }
+
             const oldImageUrl = book.imageUrl;
 
             const updateFields = {
