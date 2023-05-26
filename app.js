@@ -7,13 +7,16 @@ const userRoutes = require("./routes/user");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
 require("dotenv").config();
+
+// Configuration du rate limit pour limiter les requêtes
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
-    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    max: 100, // Limite chaque IP à 100 requêtes par fenêtre de temps (ici, 15 minutes)
+    standardHeaders: true, // Retourne les informations du rate limit dans les en-têtes `RateLimit-*`
+    legacyHeaders: false, // Désactive les en-têtes `X-RateLimit-*` (en-têtes héritées)
 });
 
+// Connexion à la base de données MongoDB
 mongoose
     .connect(
         "mongodb+srv://" +
@@ -28,10 +31,14 @@ mongoose
     .then(() => console.log("Connexion à MongoDB réussie !"))
     .catch(() => console.log("Connexion à MongoDB échouée !"));
 
+// Utilisation du rate limit pour l'application
 app.use(limiter);
+
+// Configuration de l'analyseur de corps de requête JSON
 app.use(express.json());
 app.use(bodyParser.json());
 
+// Configuration des en-têtes CORS
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
@@ -45,8 +52,13 @@ app.use((req, res, next) => {
     next();
 });
 
+// Configuration du dossier d'images statiques
 app.use("/images", express.static(path.join(__dirname, "images")));
+
+// Configuration des routes pour les livres
 app.use("/api/books", booksRoutes);
+
+// Configuration des routes pour l'authentification
 app.use("/api/auth", userRoutes);
 
 module.exports = app;
