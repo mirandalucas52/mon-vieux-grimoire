@@ -1,8 +1,6 @@
 const Book = require("../models/Book");
 
-const fs = require("fs");
-
-// Créer un livre
+const fs = require("fs"); // Créer un livre
 exports.createBook = (req, res, next) => {
     const bookObject = JSON.parse(req.body.book); // Conversion de la chaîne JSON en objet JavaScript
     delete bookObject._id; // Suppression de la clé "_id" de l'objet
