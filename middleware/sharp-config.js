@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require("path");
+const sharp = require("sharp");
 
 const sharpMiddleware = (req, res, next) => {
     //Vérifie la présence d'un fichier
