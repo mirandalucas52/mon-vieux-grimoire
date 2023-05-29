@@ -47,10 +47,6 @@ exports.modifyBook = (req, res, next) => {
                 return res.status(404).json({ message: "Book not found" }); // Vérification si le livre existe
             }
 
-            if (book.userId !== req.auth.userId) {
-                return res.status(403).json({ message: "Not authorized" }); // Vérification de l'autorisation de modification du livre
-            }
-
             if (book.userId.toString() !== req.auth.userId.toString()) {
                 return res
                     .status(403)
