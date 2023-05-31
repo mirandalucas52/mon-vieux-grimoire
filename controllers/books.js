@@ -157,11 +157,21 @@ exports.ratingBook = (req, res, next) => {
         grade: updatedGrade,
     }; // Données de la note à ajouter
 
-    Book.findOneAndUpdate(
-        bookFilter, // Filtre pour trouver le livre à mettre à jour
-        { $push: { ratings: updatedData } }, // Ajout de la note à la liste des notes du livre
-        { new: true } // Option pour retourner le livre mis à jour
-    )
+    Book.findOne(bookFilter)
+        .then((book) => {
+            if (
+                book.ratings.some((rating) => rating.userId === updatedUserId) // Vérification si l'utilisateur a déjà donné une note pour ce livre
+            ) {
+                return res.status(400).json({
+                    error: "L'utilisateur a déjà donné une note pour ce livre.",
+                });
+            }
+            return Book.findOneAndUpdate(
+                bookFilter, // Filtre pour trouver le livre à mettre à jour
+                { $push: { ratings: updatedData } }, // Ajout de la note à la liste des notes du livre
+                { new: true } // Option pour retourner le livre mis à jour
+            );
+        })
         .then((updatedBook) => {
             const totalRatings = updatedBook.ratings.length; // Nombre total de notes
             const ratingsSum = updatedBook.ratings.reduce(
